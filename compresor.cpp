@@ -84,38 +84,34 @@ int main(int argc, char **argv){
         return 1;
     }
     
-    int pos = 0;
-    IplImage *img = cvLoadImage(argv[1]);
-    int m = img->width, n = img->height;
-    
-    CvMat *matImg = cvCreateMat(n,m,CV_32FC3 );
-    
-    IplImage *grey = cvCreateImage(cvSize(n,m),IPL_DEPTH_8U,1);
-    
-    cvCvtColor(img,grey,CV_RGB2GRAY);
-    
-    img2mat(matImg,grey,0);
-
     cv::Mat filter = cv::getGaussianKernel(9,0.5,CV_32F);
+    cv::Mat image;
+    char *imageName = argv[1];
+    image = cv::imread( imageName, 1 );
+
+    cv::Mat gray_image;
+    cv::cvtColor( image, gray_image, CV_BGR2GRAY );
+
+    cv::imwrite( "./Gray_Image.jpg", gray_image);
+
+    cv::namedWindow( imageName, CV_WINDOW_AUTOSIZE );
+    cv::namedWindow( "Gray image", CV_WINDOW_AUTOSIZE );
+
+    cv::imshow( imageName, image );
+    cv::imshow( "Gray image", gray_image );
+
+    cv::waitKey(0);
 
     /*
     // Display kernel values
 	cv::Mat_<float>::const_iterator it= filter.begin<float>();  
 	cv::Mat_<float>::const_iterator itend= filter.end<float>();  
 	cout << "Valores del Kernel\n" << "[";
-	for ( ; it!= itend; ++it) {
+	for ( ; it!= itend; ++it) 
 		cout << *it << " ";
-	}
 	cout << "]\n" << endl;
 
-
-	for(int i=0;i<10;i++){
-	    for(int j=0;j<10;j++){
-	        CvScalar scal = cvGet2D( matImg,j,i);
-	        printf( "(%.f,%.f,%.f)  ",scal.val[0], scal.val[1], scal.val[2] );
-	    }
-	    printf("\n");
-	}*/
+    /*
 
     // // forward fft
     // fft(data);
@@ -134,5 +130,6 @@ int main(int argc, char **argv){
     // {
     //     cout << data[i] << endl;
     // }
+    */
     return 0;
 }
