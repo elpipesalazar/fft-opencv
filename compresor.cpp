@@ -52,35 +52,9 @@ void ifft(CArray& x)
     x /= x.size();
 }
 
-
-void img2mat(CvMat *mat, IplImage *img, int ch) {
-    int n = img->height, m = img->width, nch = img->nChannels;
-    for(int i = 0; i < n; ++i){
-        uchar *orow = (uchar*)(img->imageData + i*img->widthStep);
-        pix *drow = (pix*)(mat->data.ptr + i*mat->step);
-        for(int j = 0; j< m; ++j)
-            drow[j] = orow[j*nch + ch];
-    }
-}
-
-void mat2img(IplImage *img, CvMat* mat, int ch) {
-    int n = mat->height, m = mat->width, nch = img->nChannels;
-    for(int i = 0; i< n; ++i){
-        uchar *drow = (uchar*)(img->imageData + i*img->widthStep);
-        pix *orow = (pix*)(mat->data.ptr + i*mat->step);
-        for(int j = 0; j< m; ++j){
-            pix x = orow[j];
-            if (x<0) x=0; if(x>255) x=255;
-            drow[j*nch + ch] = x;
-        }
-    }
-}
-
-
-
 int main(int argc, char **argv){
     if(argc < 2){
-        printf("\nUsage: %s <filename.jpg>\n",argv[0]);
+        cout<<endl<<"Usage: "<<argv[0]<<" <filename.jpg>"<<endl;
         return 1;
     }
     
@@ -94,42 +68,14 @@ int main(int argc, char **argv){
 
     cv::imwrite( "./Gray_Image.jpg", gray_image);
 
+    /*
+    * This section shows the imgage 
     cv::namedWindow( imageName, CV_WINDOW_AUTOSIZE );
     cv::namedWindow( "Gray image", CV_WINDOW_AUTOSIZE );
 
     cv::imshow( imageName, image );
     cv::imshow( "Gray image", gray_image );
 
-    cv::waitKey(0);
-
-    /*
-    // Display kernel values
-	cv::Mat_<float>::const_iterator it= filter.begin<float>();  
-	cv::Mat_<float>::const_iterator itend= filter.end<float>();  
-	cout << "Valores del Kernel\n" << "[";
-	for ( ; it!= itend; ++it) 
-		cout << *it << " ";
-	cout << "]\n" << endl;
-
-    /*
-
-    // // forward fft
-    // fft(data);
- 
-    // cout << "fft" << endl;
-    // for (int i = 0; i < img->width; ++i)
-    // {
-    //     cout << data[i] << endl;
-    // }
- 
-    // // inverse fft
-    // ifft(data);
- 
-    // cout << endl << "ifft" << endl;
-    // for (int i = 0; i < 8; ++i)
-    // {
-    //     cout << data[i] << endl;
-    // }
-    */
+    cv::waitKey(0);*/
     return 0;
 }
