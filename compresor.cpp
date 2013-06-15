@@ -6,13 +6,12 @@
 #include "highgui.h"
 #include "cv.h"
 
-const double PI = 3.141592653589793238460;
- 
-typedef std::complex<double> Complex;
-typedef std::valarray<Complex> CArray;
-
+const double PI = acos(-1);
 using namespace std;
-
+ 
+typedef complex<double> Complex;
+typedef valarray<Complex> CArray;
+typedef float pix;
 
 // FFT Cooley–Tukey 
 void fft(CArray& x)
@@ -54,35 +53,52 @@ void ifft(CArray& x)
 }
 
 
+void img2mat(CvMat *mat, IplImage *img, int ch) {
+    int n = img->height, m = img->width, nch = img->nChannels;
+    for(int i = 0; i < n; ++i){
+        uchar *orow = (uchar*)(img->imageData + i*img->widthStep);
+        pix *drow = (pix*)(mat->data.ptr + i*mat->step);
+        for(int j = 0; j< m; ++j)
+            drow[j] = orow[j*nch + ch];
+    }
+}
 
-int main(int argc, char **argv){
-    int pos = 0;
-    IplImage *img = cvLoadImage(argv[1]);
-    CvMat *matImg = cvCreateMat(img->height,img->width,CV_32FC3 );
-    cvConvert( img, matImg );
-
-    cv::Mat filter = cv::getGaussianKernel(9,0.5,CV_32F);
-    
-	Complex test[1000];
-
-    for(int i=0;i<1000;i++)
-    {
-        for(int j=0;j<1000;j++)
-        {
-            CvScalar scal = cvGet2D( matImg,j,i);
-            test[pos] =  std::complex<double>(0.0) ;
-            test[pos + 1] =  std::complex<double>(scal.val[1]);
-            test[pos + 2] =  std::complex<double>(scal.val[2]);
-            pos = pos + 3 ;
+void mat2img(IplImage *img, CvMat* mat, int ch) {
+    int n = mat->height, m = mat->width, nch = img->nChannels;
+    for(int i = 0; i< n; ++i){
+        uchar *drow = (uchar*)(img->imageData + i*img->widthStep);
+        pix *orow = (pix*)(mat->data.ptr + i*mat->step);
+        for(int j = 0; j< m; ++j){
+            pix x = orow[j];
+            if (x<0) x=0; if(x>255) x=255;
+            drow[j*nch + ch] = x;
         }
     }
-
-    //CArray data(test, img->width*3);
-
+}
 
 
 
+int main(int argc, char **argv){
+    if(argc < 2){
+        printf("\nUsage: %s <filename.jpg>\n",argv[0]);
+        return 1;
+    }
+    
+    int pos = 0;
+    IplImage *img = cvLoadImage(argv[1]);
+    int m = img->width, n = img->height;
+    
+    CvMat *matImg = cvCreateMat(n,m,CV_32FC3 );
+    
+    IplImage *grey = cvCreateImage(cvSize(n,m),IPL_DEPTH_8U,1);
+    
+    cvCvtColor(img,grey,CV_RGB2GRAY);
+    
+    img2mat(matImg,grey,0);
 
+    cv::Mat filter = cv::getGaussianKernel(9,0.5,CV_32F);
+
+    /*
     // Display kernel values
 	cv::Mat_<float>::const_iterator it= filter.begin<float>();  
 	cv::Mat_<float>::const_iterator itend= filter.end<float>();  
@@ -93,15 +109,13 @@ int main(int argc, char **argv){
 	cout << "]\n" << endl;
 
 
-	for(int i=0;i<10;i++)
-	{
-	    for(int j=0;j<10;j++)
-	    {
+	for(int i=0;i<10;i++){
+	    for(int j=0;j<10;j++){
 	        CvScalar scal = cvGet2D( matImg,j,i);
 	        printf( "(%.f,%.f,%.f)  ",scal.val[0], scal.val[1], scal.val[2] );
 	    }
 	    printf("\n");
-	}
+	}*/
 
     // // forward fft
     // fft(data);
